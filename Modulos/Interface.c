@@ -97,6 +97,7 @@ void Mostrar_Tela_Postagem(S_Postagem* Post)
     {
         printf("[1] Curtir\n");
         printf("[2] Descurtir\n");
+        printf("[??] Ver Quem Curtiu\n");
         printf("------------------------\n");
         printf("[3] Comentar\n");
         printf("[4] Ver Comentarios\n");
