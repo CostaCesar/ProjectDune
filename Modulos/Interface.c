@@ -5,6 +5,17 @@ S_ArrayPostagens Postagens = {0, NULL};
 S_Usuario* Usuario_Logado = NULL;
 S_Usuario* Usuario_Ativo = NULL;
 
+void Mostrar_Postagens_Curtidas()
+{
+    S_ArrayPostagens Curtidas = {0, NULL};
+    for(int i = 0; i < Usuario_Ativo->PostagensCurtidas.Quantidade; i++)
+        Adicionar_Postagem_NoArray(&Curtidas, Achar_Postagem_PorId(&Postagens, Usuario_Ativo->PostagensCurtidas.Id[i]));
+
+    Mostrar_Postagens_EmMenu(&Curtidas);
+    Liberar_Postagens(&Curtidas);
+    return;
+}
+
 int Mostrar_Tela_Inicio()
 {
     int Escolha = 0;
@@ -46,7 +57,7 @@ int Mostrar_Tela_Inicio()
         }
     } while(1);
 }
-void Mostrar_Comentarios_EmPost(S_Postagem* Post)
+void Mostrar_Comentarios_EmPost(S_Postagem* postagem)
 {
     int Escolha = 0;
     unsigned int Id = 0;
@@ -71,43 +82,43 @@ void Mostrar_Comentarios_EmPost(S_Postagem* Post)
     case 0:
         break;
     case 1:
-        Imprime_Comentarios(&Post->Comentarios, &Usuarios);
+        Imprime_Comentarios(&postagem->Comentarios, &Usuarios);
         break;
     case 2:
-        Imprime_Comentarios_DoUsuario(&Post->Comentarios, &Usuarios, Usuario_Logado->Id);
+        Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, Usuario_Logado->Id);
         break;
     case 3:
-        Imprime_Comentarios_DoUsuario(&Post->Comentarios, &Usuarios, Post->Autor_Id);
+        Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, postagem->Autor_Id);
         break;
     case 4:
-        Imprime_Comentarios_DoUsuario(&Post->Comentarios, &Usuarios, Usuario_Ativo->Id);
+        Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, Usuario_Ativo->Id);
         break;
     case 5:
         printf("Id do usuario: ");
         scanf("%u", &Id);
         getchar();
-        Imprime_Comentarios_DoUsuario(&Post->Comentarios, &Usuarios, Id);
+        Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, Id);
         break;
     }
 }
-void Mostrar_Tela_Postagem(S_Postagem* Post)
+void Mostrar_Tela_Postagem(S_Postagem* postagem)
 {
     int Escolha = 0;
     do
     {
         printf("[1] Curtir\n");
         printf("[2] Descurtir\n");
-        printf("[??] Ver Quem Curtiu\n");
+        printf("[3] Ver Quem Curtiu\n");
         printf("------------------------\n");
-        printf("[3] Comentar\n");
-        printf("[4] Ver Comentarios\n");
-        if(Post->Autor_Id == Usuario_Logado->Id)
+        printf("[4] Comentar\n");
+        printf("[5] Ver Comentarios\n");
+        if(postagem->Autor_Id == Usuario_Logado->Id)
         {
-            printf("[5] Editar Comentario\n");
-            printf("[6] Apagar Comentario\n");
+            printf("[6] Editar Comentario\n");
+            printf("[7] Apagar Comentario\n");
             printf("------------------------\n");
-            printf("[7] Editar Post\n");
-            printf("[8] Apagar Post\n");
+            printf("[8] Editar Postagem\n");
+            printf("[9] Apagar Postagem\n");
         }
         printf("------------------------\n");
         printf("[0] Concluir\n");
@@ -121,49 +132,57 @@ void Mostrar_Tela_Postagem(S_Postagem* Post)
         case 0:
             return;
         case 1:
-            Curtir_Postagem(&Usuarios, Post, Usuario_Logado->Id);
+            Curtir_Postagem(&Usuarios, postagem, Usuario_Logado->Id);
             break;
         case 2:
-            Descurtir_Postagem(&Usuarios, Post, Usuario_Logado->Id);
+            Descurtir_Postagem(&Usuarios, postagem, Usuario_Logado->Id);
             break;
         case 3:
-            Comentar(&Usuarios, Post, Usuario_Logado->Id);
+            Mostrar_Curtidas(&Usuarios, postagem);
             break;
         case 4:
-            Mostrar_Comentarios_EmPost(Post);
+            Comentar(&Usuarios, postagem, Usuario_Logado->Id);
             break;
-        case 7:
-            if(Post->Autor_Id == Usuario_Logado->Id)
-                Editar_Post(&Postagens, Post);
+        case 5:
+            Mostrar_Comentarios_EmPost(postagem);
             break;
         case 8:
-            if(Post->Autor_Id == Usuario_Logado->Id)
+            if(postagem->Autor_Id == Usuario_Logado->Id)
+                Editar_Post(&Postagens, postagem);
+            break;
+        case 7:
+            if(postagem->Autor_Id == Usuario_Logado->Id)
             {
-                Apagar_Post(&Postagens, Post->Id, &Usuarios);
+                Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, Usuario_Logado->Id);
+                Descomentar(&Usuarios, postagem, Usuario_Logado->Id);
+            }
+            break;
+        case 9:
+            if(postagem->Autor_Id == Usuario_Logado->Id)
+            {
+                Apagar_Post(&Postagens, postagem->Id, &Usuarios);
                 printf(">>> Postagem apagada! <<<\n");
             }
             return;
         case 6:
-            if(Post->Autor_Id == Usuario_Logado->Id)
-                Descomentar(&Usuarios, Post, Usuario_Logado->Id);
-            break;
-        case 5:
-            if(Post->Autor_Id == Usuario_Logado->Id)
-                // TODO:
-                // AlterarComentario();
+            if(postagem->Autor_Id == Usuario_Logado->Id)
+            {
+                Imprime_Comentarios_DoUsuario(&postagem->Comentarios, &Usuarios, Usuario_Logado->Id);
+                Recomentar(postagem, Usuario_Logado->Id);
+            }
             break;
         }
     } while (1);
 }
-void Mostrar_Postagem(S_Postagem* Post)
+void Mostrar_Postagem(S_Postagem* postagem)
 {
-    if(Post == NULL)
+    if(postagem == NULL)
     {
-        printf(">> Post Nao Encontrado <<\n");
+        printf(">> Postagem Nao Encontrado <<\n");
         return;
     }
-    VerPostagem(Post, &Usuarios);
-    Mostrar_Tela_Postagem(Post);
+    VerPostagem(postagem, &Usuarios);
+    Mostrar_Tela_Postagem(postagem);
     return;
 }
 void Mostrar_Usuarios_EmMenu(S_ArrayUsuarios* array)
@@ -211,7 +230,7 @@ void Mostrar_Postagens_EmMenu(S_ArrayPostagens* array)
     int Escolha = 0, Indice_atual = 0;
     if(array->Quantidade < 1)
     {
-        printf(">>>> Este Perfil Nao Possui Nenhum Post <<<<\n");
+        printf(">>>> Este Perfil Nao Possui Nenhum postagem <<<<\n");
         return;
     }
     do
@@ -250,7 +269,7 @@ void Mostrar_Postagens_EmMenu(S_ArrayPostagens* array)
         
     } while (1);
 }
-void Mostrar_Usuario_AlterarInfo()
+void Mostrar_Configs_Usuario()
 {
     int Escolha = 0;
     do
@@ -296,12 +315,15 @@ void Mostrar_Tela_Principal()
         Mostrar_Usuario(Usuario_Logado);
         printf("[1] Nova Postagem\n");
         printf("[2] Ver Postagem \n");
-        printf("[3] Ver Postagens deste perfil \n");
+        printf("[3] Ver Postagens Deste Perfil \n");
         printf("[4] Ver Todas As Postagens\n");
-        printf("[5] Buscar Perfil\n");
-        printf("[6] Ver Todos Os Perfis\n");
-        printf("[7] Estatisticas Do Perfil\n");
-        printf("[8] Alterar Perfil\n");
+        printf("[5] Ver Postagens Curtidas\n");
+        printf("-------------------------------\n");
+        printf("[6] Buscar Perfil\n");
+        printf("[7] Ver Todos Os Perfis\n");
+        printf("[8] Estatisticas Deste Perfil\n");
+        printf("[9] Alterar Perfil\n");
+        printf("-------------------------------\n");
         printf("[0] Deslogar\n");
         
         printf(">> ");
@@ -331,7 +353,7 @@ void Mostrar_Tela_Principal()
             scanf("%d", &Escolha);
             getchar();
             
-            Mostrar_Postagem(Achar_Postagem(&Postagens, Escolha));
+            Mostrar_Postagem(Achar_Postagem_PorId(&Postagens, Escolha));
             break;
         case 3:
             Posts_DoUsuario = Achar_Postagens_DoUsuario(&Postagens, Usuario_Logado->Id);
@@ -342,6 +364,9 @@ void Mostrar_Tela_Principal()
             Mostrar_Postagens_EmMenu(&Postagens);
             break;
         case 5:
+            Mostrar_Postagens_Curtidas();
+            break;
+        case 6:
             printf(">> Buscar por? <1 para nome, 2 para email, 0 cancelar>: ");
             
             scanf("%d", &Escolha);
@@ -360,7 +385,7 @@ void Mostrar_Tela_Principal()
             else Mostrar_Usuarios_EmMenu(&Busca_Usuarios);
             Liberar_Usuarios(&Busca_Usuarios);
             break;
-        case 6:
+        case 7:
             printf("[1] Por Nome\n");
             printf("[2] Por Email\n");
             printf("[0] Por Id\n");
@@ -371,11 +396,11 @@ void Mostrar_Tela_Principal()
             Ordenar_Usuarios(&Usuarios, (E_OrdenarPor) Escolha);
             Mostrar_Usuarios_EmMenu(&Usuarios);
             break;
-        case 7:
+        case 8:
             Mostrar_Usuario(Usuario_Logado);
             break;
-        case 8:
-            Mostrar_Usuario_AlterarInfo();
+        case 9:
+            Mostrar_Configs_Usuario();
             break;
         }
     } while (1);
@@ -387,8 +412,9 @@ void Mostrar_Tela_UsuarioAtivo()
     {
         int Escolha = 0;
         Mostrar_Usuario(Usuario_Ativo);
-        printf("[1] Ver Postagens deste perfil \n");
-        printf("[2] Estatisticas Do Perfil\n");
+        printf("[1] Ver Postagens Deste Perfil \n");
+        printf("[2] Ver Postagens Curtidas Por Este Perfil\n");
+        printf("[3] Estatisticas Do Perfil\n");
         printf("[0] Voltar\n");
         
         printf(">> ");
@@ -406,6 +432,9 @@ void Mostrar_Tela_UsuarioAtivo()
             Liberar_Postagens(&Posts_DoUsuario);
             break;
         case 2:
+            Mostrar_Postagens_Curtidas();
+            return;
+        case 3:
             Mostrar_Usuario(Usuario_Ativo);
             break;
         }

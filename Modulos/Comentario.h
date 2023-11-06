@@ -19,6 +19,7 @@ typedef struct
     S_Comentario *Comentarios;
 } S_ArrayComentarios;
 
+unsigned int GerarId_Comentario(const S_ArrayComentarios* array);
 void Alocar_Comentario(S_ArrayComentarios* array);
 void Desalocar_Comentario(S_ArrayComentarios* array);
 void Criar_Comentario(S_ArrayComentarios* array, unsigned int id_postagem, unsigned int id_autor);
@@ -32,5 +33,6 @@ void Imprime_Comentarios(const S_ArrayComentarios* array, const S_ArrayUsuarios*
 bool Imprime_Comentarios_DoUsuario(const S_ArrayComentarios* array, const S_ArrayUsuarios* usuarios, unsigned int id_logado);
 
 int Achar_Posicao_DoComentario(S_ArrayComentarios* array, unsigned int id_comentario);
+S_Comentario* Achar_Comentario(S_ArrayComentarios* array, int id_comentario);
 S_ArrayComentarios Achar_Comentarios_DoUsuario(const S_ArrayComentarios* array, unsigned int id_usuario);
 #endif

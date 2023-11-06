@@ -19,7 +19,7 @@
 				"Programa.exe"
 			],
 			"options": {
-				"cwd": "${fileDirname}"
+				"cwd": "D:\\Progm\\C\\ProjectDune"
 			},
 			"problemMatcher": [
 				"$gcc"

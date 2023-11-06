@@ -287,6 +287,12 @@ void Mostrar_Usuario_EmTabela(const S_Usuario* usuario)
 }
 void Mostrar_Usuarios(const S_ArrayUsuarios* array)
 {
+    if(array->Quantidade == 0)
+    {
+        printf(">>> Nenhum Usuario Encontrado! <<<\n");
+        return;
+    }
+    
     printf("#--------#------------------#---------------------------------------#----------------------------------------#\n");
     printf("|   ID   |       Nome       |                 Email                 |                 Status                 |\n");
     printf("#========#==================#=======================================#========================================#\n");

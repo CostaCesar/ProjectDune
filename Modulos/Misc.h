@@ -23,6 +23,7 @@ typedef struct
 void Alocar_ArrayId(S_ArrayId* array);
 void Alocar_ArrayId_ComValor(S_ArrayId* array, unsigned int novo_valor);
 void Remove_Posicao_ArrayId(S_ArrayId* array, int posicao);
+void Remove_Id_DoArray(S_ArrayId* array, unsigned int valor);
 void Desalocar_ArrayId(S_ArrayId* array);
 void Liberar_ArrayId(S_ArrayId* array);
 

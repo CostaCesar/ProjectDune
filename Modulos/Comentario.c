@@ -5,6 +5,16 @@
 #include "Usuario.h"
 #include "Misc.h"
 
+unsigned int GerarId_Comentario(const S_ArrayComentarios* array)
+{
+    unsigned int ultimo_id = 1;
+    for(int i = 0; i < array->Quantidade; i++)
+    {
+        if(array->Comentarios[i].Id > ultimo_id)
+            ultimo_id = array->Comentarios[i].Id;
+    }
+    return ultimo_id + 1;
+}
 void Alocar_Comentario(S_ArrayComentarios* array)
 {
     (array->Quantidade)++;
@@ -43,6 +53,15 @@ void Apagar_Comentario(S_ArrayComentarios* array, int posicao_comentario)
 {
     array->Comentarios[posicao_comentario] = array->Comentarios[array->Quantidade - 1];
     Desalocar_Comentario(array);
+}
+S_Comentario* Achar_Comentario(S_ArrayComentarios* array, int id_comentario)
+{
+    for (int i = 0; i < array->Quantidade; i++)
+    {
+        if(array->Comentarios[i].Id == id_comentario)
+            return &array->Comentarios[i];
+    }
+    return NULL;
 }
 int Achar_Posicao_DoComentario(S_ArrayComentarios* array, unsigned int id_comentario)
 {
@@ -83,7 +102,7 @@ void Criar_Comentario(S_ArrayComentarios* array, unsigned int id_postagem, unsig
     fgets(NovoComentario->Mensagem, TEXTO_TAM, stdin);
     Resolve_Fgets(NovoComentario->Mensagem);
 
-    NovoComentario->Id = array->Quantidade - 1;
+    NovoComentario->Id = GerarId_Comentario(array);
     NovoComentario->Perfil_Id = id_autor;
     NovoComentario->Postagem_Id = id_postagem;
 
@@ -95,7 +114,7 @@ void Editar_Comentario(S_ArrayComentarios* array, S_Comentario* comentario)
     printf(">> Edite o seu comentario (maximo de 256 caracteres): \n");
     fgets(comentario->Mensagem, TEXTO_TAM, stdin);
     Resolve_Fgets(comentario->Mensagem);
-    printf(">> Comentario Criado<<\n");
+    printf(">>> Comentario Editado <<<\n");
     return;
 }
 bool Verifica_Autoria(const S_Comentario* comentario, unsigned int id_usuario)

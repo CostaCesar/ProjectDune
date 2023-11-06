@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+unsigned int GerarId_Postagem(const S_ArrayPostagens* array)
+{
+    unsigned int ultimo_id = 1;
+    for(int i = 0; i < array->Quantidade; i++)
+    {
+        if(array->Postagens[i].Id > ultimo_id)
+            ultimo_id = array->Postagens[i].Id;
+    }
+    return ultimo_id + 1;
+}
 void Alocar_Postagem(S_ArrayPostagens* array)
 {
     (array->Quantidade)++;
@@ -54,18 +64,18 @@ void Liberar_Postagens_Profundo(S_ArrayPostagens* array)
     array->Quantidade = 0;
     return;
 }
-void Adicionar_Postagem_NoArray(S_ArrayPostagens* array, const S_Postagem* post)
+void Adicionar_Postagem_NoArray(S_ArrayPostagens* array, const S_Postagem* postagem)
 {
     Alocar_Postagem(array);
-    array->Postagens[array->Quantidade-1] = *post;
+    array->Postagens[array->Quantidade-1] = *postagem;
     return;
 }
 
-S_Postagem* Achar_Postagem(const S_ArrayPostagens* array, unsigned int id)
+S_Postagem* Achar_Postagem_PorId(const S_ArrayPostagens* array, unsigned int id_postagem)
 {
     for(int i = 0; i < array->Quantidade; i++)
     {
-        if(array->Postagens[i].Id == id)
+        if(array->Postagens[i].Id == id_postagem)
             return &array->Postagens[i];
     }
     return NULL;
@@ -75,11 +85,11 @@ void Postar(S_ArrayPostagens* array, unsigned int id_autor)
     Alocar_Postagem(array);
     S_Postagem* NovaPostagem = &array->Postagens[array->Quantidade - 1];
 
-    printf(">> Escreva uma descricao para seu post: ");
+    printf(">> Escreva uma descricao para seu postagem: ");
     fgets(NovaPostagem->Descrit, TEXTO_TAM, stdin);
     Resolve_Fgets(NovaPostagem->Descrit);
 
-    NovaPostagem->Id = array->Quantidade;
+    NovaPostagem->Id = GerarId_Postagem(array);
     NovaPostagem->Autor_Id = id_autor;
     NovaPostagem->Imagens = (S_ArrayImagens) {0, NULL};
     NovaPostagem->QuemCurtiu = (S_ArrayId) {0, NULL};
@@ -88,10 +98,10 @@ void Postar(S_ArrayPostagens* array, unsigned int id_autor)
 void VerPostagem(const S_Postagem* postagem, const S_ArrayUsuarios* array)
 {
     S_Usuario* Autor = Achar_Usuario_PorId(array, postagem->Autor_Id);
-    printf(">>> POST #%06u <<<\n", postagem->Id);
-    printf("Autor: %s #%06u\n", Autor->Nome, Autor->Id);
-    printf("Imagens: %d\n", postagem->Imagens.Quantidade);
-    printf("Curtidas: %d \n\n", postagem->QuemCurtiu.Quantidade);
+    printf(">>> POSTAGEM %06u <<<\n", postagem->Id);
+    printf("> Autor: %s [%06u]\n", Autor->Nome, Autor->Id);
+    printf("> Imagens: %d\n", postagem->Imagens.Quantidade);
+    printf("> Curtidas: %d \n\n", postagem->QuemCurtiu.Quantidade);
     
 
     for(int i = 0; i < postagem->Imagens.Quantidade; i++)
@@ -120,10 +130,33 @@ void Comentar(S_ArrayUsuarios* array, S_Postagem* postagem, unsigned int id_auto
     S_Usuario* Usuario = Achar_Usuario_PorId(array, id_autor);
     Alocar_ArrayId_ComValor(&Usuario->PostagensComentadas, postagem->Id);
 }
+void Recomentar(S_Postagem* postagem, unsigned int id_autor)
+{
+    int id_comentario = -1;
+
+    printf(">> ID do comentario a ser apagado: ");
+    scanf("%d", &id_comentario);
+    getchar();
+
+    S_Comentario* Comentario = Achar_Comentario(&postagem->Comentarios, id_comentario);
+    if(Comentario == NULL)
+    {
+        printf(">>>> Este Comentario nao existe! <<<<\n");
+        return;
+    }
+    if(Verifica_Autoria(Comentario, id_autor) == false)
+    {
+        printf(">>>> Este Comentario pertence a outro usuario! <<<<\n");
+        return;
+    }
+
+    Editar_Comentario(&postagem->Comentarios, Comentario);
+    printf(">>> Postagem apagada! <<<\n");
+}
+
 void Descomentar(S_ArrayUsuarios* array, S_Postagem* postagem, unsigned int id_autor)
 {
     int id_comentario = -1, posicao_comentario = -1;
-    Imprime_Comentarios_DoUsuario(&postagem->Comentarios, array, id_autor);
 
     printf(">> ID do comentario a ser apagado: ");
     scanf("%d", &id_comentario);
@@ -132,18 +165,21 @@ void Descomentar(S_ArrayUsuarios* array, S_Postagem* postagem, unsigned int id_a
     posicao_comentario = Achar_Posicao_DoComentario(&postagem->Comentarios, id_comentario);
     if(posicao_comentario < 0)
     {
-        printf(">>> Este Comentario nao existe! <<<\n");
+        printf(">>>> Este Comentario nao existe! <<<<\n");
         return;
     }
     if(Verifica_Autoria(&postagem->Comentarios.Comentarios[posicao_comentario], id_autor) == false)
     {
-        printf(">>> Este Comentario pertence a outro usuario! <<<\n");
+        printf(">>>> Este Comentario pertence a outro usuario! <<<<\n");
         return;
     }
+    S_Comentario* Comentario = &postagem->Comentarios.Comentarios[posicao_comentario];
+
+    S_Usuario* Usuario = Achar_Usuario_PorId(array, Comentario->Perfil_Id);
+    Remove_Id_DoArray(&Usuario->PostagensComentadas, Comentario->Id);
+
     Apagar_Comentario(&postagem->Comentarios, posicao_comentario);
     printf(">>> Postagem apagada! <<<\n");
-
-    Apagar_Comentario(&postagem->Comentarios, 0);
 }
 
 void Curtir_Postagem(S_ArrayUsuarios* array, S_Postagem* postagem, unsigned int id_usuario)
@@ -171,13 +207,27 @@ void Descurtir_Postagem(S_ArrayUsuarios* array, S_Postagem* postagem, unsigned i
             Desalocar_ArrayId(&postagem->QuemCurtiu);
             
             S_Usuario* Usuario = Achar_Usuario_PorId(array, id_usuario);
-            Desalocar_ArrayId(&Usuario->PostagensCurtidas);
+            Remove_Id_DoArray(&Usuario->PostagensCurtidas, postagem->Id);
             
             printf("Postagem Descurtida!\n");
             return;
         }
     } 
 }
+void Mostrar_Curtidas(const S_ArrayUsuarios* array, const S_Postagem* postagem)
+{
+    S_ArrayUsuarios Encontrados = {0, NULL};
+    S_Usuario* Buffer;
+    for(int i = 0; i < postagem->QuemCurtiu.Quantidade; i++)
+    {
+        Buffer = Achar_Usuario_PorId(array, postagem->QuemCurtiu.Id[i]);
+        Adicionar_Usuario_NoArray(&Encontrados, Buffer);
+    }
+
+    Mostrar_Usuarios(&Encontrados);
+    Liberar_Usuarios(&Encontrados);
+}
+
 bool VerificarCurtida_Postagem(const S_Postagem* postagem, unsigned int id_usuario)
 {
     for(int i = 0; i < postagem->QuemCurtiu.Quantidade; i++)
@@ -187,7 +237,7 @@ bool VerificarCurtida_Postagem(const S_Postagem* postagem, unsigned int id_usuar
     }
     return false;
 }
-void Editar_Post(S_ArrayPostagens* postagens, S_Postagem* post)
+void Editar_Post(S_ArrayPostagens* postagens, S_Postagem* postagem)
 {
     int Escolha = 0;
     do
@@ -206,15 +256,15 @@ void Editar_Post(S_ArrayPostagens* postagens, S_Postagem* post)
             case 0:
                 return;
             case 1:
-                printf(">> Escreva uma descricao para seu post: ");
-                fgets(post->Descrit, TEXTO_TAM, stdin);
-                Resolve_Fgets(post->Descrit);
+                printf(">> Escreva uma descricao para seu postagem: ");
+                fgets(postagem->Descrit, TEXTO_TAM, stdin);
+                Resolve_Fgets(postagem->Descrit);
                 printf(">> Descricao alterada com sucesso! <<\n");
                 break;
             case 2:
                 do
                 {
-                    Upload_Imagem(&post->Imagens);
+                    Upload_Imagem(&postagem->Imagens);
                     printf(">> Adicionar outra imagem? <1 para sim, 0 para nao>: \n");
                 
                     scanf("%d", &Escolha);
@@ -225,7 +275,7 @@ void Editar_Post(S_ArrayPostagens* postagens, S_Postagem* post)
                 printf(">> Posicao da imagem: \n");
                 scanf("%d", &Escolha);
 
-                Remover_Imagem_DoArray(&post->Imagens, Escolha-1);
+                Remover_Imagem_DoArray(&postagem->Imagens, Escolha-1);
                 break;
         }
     } while (1);

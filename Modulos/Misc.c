@@ -96,4 +96,12 @@ void Liberar_ArrayId(S_ArrayId* array)
     array->Quantidade = 0;
     return;
 }
-
+void Remove_Id_DoArray(S_ArrayId* array, unsigned int valor)
+{
+    for(int i = 0; i < array->Quantidade; i++)
+    {
+        if(array->Id[i] == valor)
+            Remove_Posicao_ArrayId(array, i);
+    }
+    return;
+}
