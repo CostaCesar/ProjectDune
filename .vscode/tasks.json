@@ -3,23 +3,18 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "C/C++: gcc.exe build active file",
-			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+			"label": "C/C++: Compilar - Linux",
+			"command": "/usr/bin/gcc",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
-				"main.c",
-				"Modulos\\Misc.c",
-				"Modulos\\Usuario.c",
-				"Modulos\\Postagem.c",
-				"Modulos\\Comentario.c",
-				"Modulos\\Imagem.c",
-				"Modulos\\Interface.c",
+				"Modulos/*.c",
+				"*.c",
 				"-o",
-				"Programa.exe"
+				"Programa.out"
 			],
 			"options": {
-				"cwd": "D:\\Progm\\C\\ProjectDune"
+				"cwd": "${fileDirname}"
 			},
 			"problemMatcher": [
 				"$gcc"
@@ -28,7 +23,31 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: C:\\msys64\\mingw64\\bin\\gcc.exe"
+			"detail": "compilador: /usr/bin/gcc"
+		},
+		{
+			"type": "cppbuild",
+			"label": "C/C++: Compilar - Windows",
+			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"Modulos/*.c",
+				"*.c",
+				"-o",
+				"Programa.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compilador: C:\\msys64\\mingw64\\bin\\gcc.exe"
 		}
 	]
 }
