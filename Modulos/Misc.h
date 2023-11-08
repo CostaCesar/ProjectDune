@@ -6,6 +6,12 @@
 #define SENHA_TAM   (16) + 1
 #define TEXTO_TAM   (256) + 1
 
+#ifdef __unix__
+#define Limpar_Tela() system("clear");
+#else
+#define Limpar_Tela() system("cls");
+#endif
+
 typedef enum
 {
     Ordena_Id = 0,
