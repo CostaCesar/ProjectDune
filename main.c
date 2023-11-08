@@ -24,6 +24,7 @@ int main(int argc, char** argv)
     CarregarArquivo_Postagens(&Postagens, CAMINHO_POSTS);
     while (1)
     {
+        Limpar_Tela();
         if(Mostrar_Tela_Inicio() == 1)
         {
             Deslogar_Usuario(&Usuario_Logado);

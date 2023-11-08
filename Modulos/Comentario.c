@@ -7,8 +7,8 @@
 
 unsigned int GerarId_Comentario(const S_ArrayComentarios* array)
 {
-    unsigned int ultimo_id = 1;
-    for(int i = 0; i < array->Quantidade; i++)
+    unsigned int ultimo_id = 0;
+    for(int i = 0; i < array->Quantidade - 1; i++)
     {
         if(array->Comentarios[i].Id > ultimo_id)
             ultimo_id = array->Comentarios[i].Id;
@@ -97,14 +97,13 @@ void Criar_Comentario(S_ArrayComentarios* array, unsigned int id_postagem, unsig
 {
     Alocar_Comentario(array);
     S_Comentario* NovoComentario = &array->Comentarios[array->Quantidade - 1];
+    NovoComentario->Id = GerarId_Comentario(array);
+    NovoComentario->Perfil_Id = id_autor;
+    NovoComentario->Postagem_Id = id_postagem;
 
     printf(">> Escreva o seu comentario (maximo de 256 caracteres): \n");
     fgets(NovoComentario->Mensagem, TEXTO_TAM, stdin);
     Resolve_Fgets(NovoComentario->Mensagem);
-
-    NovoComentario->Id = GerarId_Comentario(array);
-    NovoComentario->Perfil_Id = id_autor;
-    NovoComentario->Postagem_Id = id_postagem;
 
     printf(">> Comentario Criado<<\n");
     return;

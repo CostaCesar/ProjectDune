@@ -5,8 +5,8 @@
 
 unsigned int GerarId_Postagem(const S_ArrayPostagens* array)
 {
-    unsigned int ultimo_id = 1;
-    for(int i = 0; i < array->Quantidade; i++)
+    unsigned int ultimo_id = 0;
+    for(int i = 0; i < array->Quantidade - 1; i++)
     {
         if(array->Postagens[i].Id > ultimo_id)
             ultimo_id = array->Postagens[i].Id;
@@ -85,15 +85,15 @@ void Postar(S_ArrayPostagens* array, unsigned int id_autor)
     Alocar_Postagem(array);
     S_Postagem* NovaPostagem = &array->Postagens[array->Quantidade - 1];
 
-    printf(">> Escreva uma descricao para seu postagem: ");
-    fgets(NovaPostagem->Descrit, TEXTO_TAM, stdin);
-    Resolve_Fgets(NovaPostagem->Descrit);
-
     NovaPostagem->Id = GerarId_Postagem(array);
     NovaPostagem->Autor_Id = id_autor;
     NovaPostagem->Imagens = (S_ArrayImagens) {0, NULL};
     NovaPostagem->QuemCurtiu = (S_ArrayId) {0, NULL};
     NovaPostagem->Comentarios = (S_ArrayComentarios) {0, NULL};
+
+    printf(">> Escreva uma descricao para seu postagem: ");
+    fgets(NovaPostagem->Descrit, TEXTO_TAM, stdin);
+    Resolve_Fgets(NovaPostagem->Descrit);
 }
 void VerPostagem(const S_Postagem* postagem, const S_ArrayUsuarios* array)
 {
